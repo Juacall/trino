@@ -32,8 +32,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.mongodb.MongoCredential.createCredential;
 
 @DefunctConfig("mongodb.connection-per-host")
-public class MongoClientConfig
-{
+public class MongoClientConfig {
     private static final Splitter SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
     private static final Splitter PORT_SPLITTER = Splitter.on(':').trimResults().omitEmptyStrings();
 
@@ -46,7 +45,7 @@ public class MongoClientConfig
     private int connectionsPerHost = 100;
     private int maxWaitTime = 120_000;
     private int connectionTimeout = 10_000;
-    private int socketTimeout;
+    private int socketTimeout = 10_000;
     private int maxConnectionIdleTime;
     private boolean socketKeepAlive = true;
     private boolean sslEnabled;
@@ -60,88 +59,76 @@ public class MongoClientConfig
     private String implicitRowFieldPrefix = "_pos";
 
     @NotNull
-    public String getSchemaCollection()
-    {
+    public String getSchemaCollection() {
         return schemaCollection;
     }
 
     @Config("mongodb.schema-collection")
-    public MongoClientConfig setSchemaCollection(String schemaCollection)
-    {
+    public MongoClientConfig setSchemaCollection(String schemaCollection) {
         this.schemaCollection = schemaCollection;
         return this;
     }
 
-    public boolean isCaseInsensitiveNameMatching()
-    {
+    public boolean isCaseInsensitiveNameMatching() {
         return caseInsensitiveNameMatching;
     }
 
     @Config("mongodb.case-insensitive-name-matching")
-    public MongoClientConfig setCaseInsensitiveNameMatching(boolean caseInsensitiveNameMatching)
-    {
+    public MongoClientConfig setCaseInsensitiveNameMatching(boolean caseInsensitiveNameMatching) {
         this.caseInsensitiveNameMatching = caseInsensitiveNameMatching;
         return this;
     }
 
     @NotNull
     @Size(min = 1)
-    public List<ServerAddress> getSeeds()
-    {
+    public List<ServerAddress> getSeeds() {
         return seeds;
     }
 
+
     @Config("mongodb.seeds")
-    public MongoClientConfig setSeeds(String commaSeparatedList)
-    {
+    public MongoClientConfig setSeeds(String commaSeparatedList) {
         this.seeds = buildSeeds(SPLITTER.split(commaSeparatedList));
         return this;
     }
 
-    public MongoClientConfig setSeeds(String... seeds)
-    {
+    public MongoClientConfig setSeeds(String... seeds) {
         this.seeds = buildSeeds(Arrays.asList(seeds));
         return this;
     }
 
     @NotNull
-    public List<MongoCredential> getCredentials()
-    {
+    public List<MongoCredential> getCredentials() {
         return credentials;
     }
 
     @Config("mongodb.credentials")
     @ConfigSecuritySensitive
-    public MongoClientConfig setCredentials(String credentials)
-    {
+    public MongoClientConfig setCredentials(String credentials) {
         this.credentials = buildCredentials(SPLITTER.split(credentials));
         return this;
     }
 
-    public MongoClientConfig setCredentials(String... credentials)
-    {
+    public MongoClientConfig setCredentials(String... credentials) {
         this.credentials = buildCredentials(Arrays.asList(credentials));
         return this;
     }
 
-    private List<ServerAddress> buildSeeds(Iterable<String> hostPorts)
-    {
+    private List<ServerAddress> buildSeeds(Iterable<String> hostPorts) {
         ImmutableList.Builder<ServerAddress> builder = ImmutableList.builder();
         for (String hostPort : hostPorts) {
             List<String> values = PORT_SPLITTER.splitToList(hostPort);
             checkArgument(values.size() == 1 || values.size() == 2, "Invalid ServerAddress format. Requires host[:port]");
             if (values.size() == 1) {
                 builder.add(new ServerAddress(values.get(0)));
-            }
-            else {
+            } else {
                 builder.add(new ServerAddress(values.get(0), Integer.parseInt(values.get(1))));
             }
         }
         return builder.build();
     }
 
-    private List<MongoCredential> buildCredentials(Iterable<String> userPasses)
-    {
+    private List<MongoCredential> buildCredentials(Iterable<String> userPasses) {
         ImmutableList.Builder<MongoCredential> builder = ImmutableList.builder();
         for (String userPassDatabase : userPasses) {
             int lastIndex = userPassDatabase.lastIndexOf('@');
@@ -160,166 +147,140 @@ public class MongoClientConfig
     }
 
     @Min(0)
-    public int getMinConnectionsPerHost()
-    {
+    public int getMinConnectionsPerHost() {
         return minConnectionsPerHost;
     }
 
     @Config("mongodb.min-connections-per-host")
-    public MongoClientConfig setMinConnectionsPerHost(int minConnectionsPerHost)
-    {
+    public MongoClientConfig setMinConnectionsPerHost(int minConnectionsPerHost) {
         this.minConnectionsPerHost = minConnectionsPerHost;
         return this;
     }
 
     @Min(1)
-    public int getConnectionsPerHost()
-    {
+    public int getConnectionsPerHost() {
         return connectionsPerHost;
     }
 
     @Config("mongodb.connections-per-host")
-    public MongoClientConfig setConnectionsPerHost(int connectionsPerHost)
-    {
+    public MongoClientConfig setConnectionsPerHost(int connectionsPerHost) {
         this.connectionsPerHost = connectionsPerHost;
         return this;
     }
 
     @Min(0)
-    public int getMaxWaitTime()
-    {
+    public int getMaxWaitTime() {
         return maxWaitTime;
     }
 
     @Config("mongodb.max-wait-time")
-    public MongoClientConfig setMaxWaitTime(int maxWaitTime)
-    {
+    public MongoClientConfig setMaxWaitTime(int maxWaitTime) {
         this.maxWaitTime = maxWaitTime;
         return this;
     }
 
     @Min(0)
-    public int getConnectionTimeout()
-    {
+    public int getConnectionTimeout() {
         return connectionTimeout;
     }
 
     @Config("mongodb.connection-timeout")
-    public MongoClientConfig setConnectionTimeout(int connectionTimeout)
-    {
+    public MongoClientConfig setConnectionTimeout(int connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
         return this;
     }
 
     @Min(0)
-    public int getSocketTimeout()
-    {
+    public int getSocketTimeout() {
         return socketTimeout;
     }
 
     @Config("mongodb.socket-timeout")
-    public MongoClientConfig setSocketTimeout(int socketTimeout)
-    {
+    public MongoClientConfig setSocketTimeout(int socketTimeout) {
         this.socketTimeout = socketTimeout;
         return this;
     }
 
-    public boolean getSocketKeepAlive()
-    {
+    public boolean getSocketKeepAlive() {
         return socketKeepAlive;
     }
 
     @Config("mongodb.socket-keep-alive")
-    public MongoClientConfig setSocketKeepAlive(boolean socketKeepAlive)
-    {
+    public MongoClientConfig setSocketKeepAlive(boolean socketKeepAlive) {
         this.socketKeepAlive = socketKeepAlive;
         return this;
     }
 
     @NotNull
-    public ReadPreferenceType getReadPreference()
-    {
+    public ReadPreferenceType getReadPreference() {
         return readPreference;
     }
 
     @Config("mongodb.read-preference")
-    public MongoClientConfig setReadPreference(ReadPreferenceType readPreference)
-    {
+    public MongoClientConfig setReadPreference(ReadPreferenceType readPreference) {
         this.readPreference = readPreference;
         return this;
     }
 
     @NotNull
-    public WriteConcernType getWriteConcern()
-    {
+    public WriteConcernType getWriteConcern() {
         return writeConcern;
     }
 
     @Config("mongodb.write-concern")
-    public MongoClientConfig setWriteConcern(WriteConcernType writeConcern)
-    {
+    public MongoClientConfig setWriteConcern(WriteConcernType writeConcern) {
         this.writeConcern = writeConcern;
         return this;
     }
 
-    public String getRequiredReplicaSetName()
-    {
+    public String getRequiredReplicaSetName() {
         return requiredReplicaSetName;
     }
 
     @Config("mongodb.required-replica-set")
-    public MongoClientConfig setRequiredReplicaSetName(String requiredReplicaSetName)
-    {
+    public MongoClientConfig setRequiredReplicaSetName(String requiredReplicaSetName) {
         this.requiredReplicaSetName = requiredReplicaSetName;
         return this;
     }
 
-    public int getCursorBatchSize()
-    {
+    public int getCursorBatchSize() {
         return cursorBatchSize;
     }
 
     @Config("mongodb.cursor-batch-size")
-    public MongoClientConfig setCursorBatchSize(int cursorBatchSize)
-    {
+    public MongoClientConfig setCursorBatchSize(int cursorBatchSize) {
         this.cursorBatchSize = cursorBatchSize;
         return this;
     }
 
     @NotNull
-    public String getImplicitRowFieldPrefix()
-    {
+    public String getImplicitRowFieldPrefix() {
         return implicitRowFieldPrefix;
     }
 
     @Config("mongodb.implicit-row-field-prefix")
-    public MongoClientConfig setImplicitRowFieldPrefix(String implicitRowFieldPrefix)
-    {
+    public MongoClientConfig setImplicitRowFieldPrefix(String implicitRowFieldPrefix) {
         this.implicitRowFieldPrefix = implicitRowFieldPrefix;
         return this;
     }
 
-    public boolean getSslEnabled()
-    {
+    public boolean getSslEnabled() {
         return this.sslEnabled;
     }
 
     @Config("mongodb.ssl.enabled")
-    public MongoClientConfig setSslEnabled(boolean sslEnabled)
-    {
+    public MongoClientConfig setSslEnabled(boolean sslEnabled) {
         this.sslEnabled = sslEnabled;
         return this;
     }
 
     @Min(0)
-    public int getMaxConnectionIdleTime()
-    {
+    public int getMaxConnectionIdleTime() {
         return maxConnectionIdleTime;
     }
 
     @Config("mongodb.max-connection-idle-time")
-    public MongoClientConfig setMaxConnectionIdleTime(int maxConnectionIdleTime)
-    {
+    public MongoClientConfig setMaxConnectionIdleTime(int maxConnectionIdleTime) {
         this.maxConnectionIdleTime = maxConnectionIdleTime;
         return this;
     }
